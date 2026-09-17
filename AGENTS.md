@@ -84,9 +84,12 @@ Working software is more important than unnecessary complexity.
 - Use Django Admin and WhiteNoise; Paystack and Cloudinary integrations come later.
 - Do not introduce React, Vue, Next.js, Django REST Framework, Docker, Redis,
   Celery, or microservices without explicit user instruction.
-- This milestone is setup only. Do not implement product/category models, cart,
-  checkout, payment integration, order/repair workflows, authentication UI,
-  homepage design, product pages, search, or production deployment.
+- Milestone 1 (setup) is complete. Milestone 2 covers Category and Product models,
+  Django Admin catalog management, migrations, and validation only.
+- Do not implement cart, checkout, payments, order/repair workflows,
+  authentication UI, homepage design, product pages, storefront search, or
+  production deployment in this milestone.
+- Leave Milestone 2 changes uncommitted until the user has reviewed the result.
 - Never commit secrets, local databases, virtual environments, uploaded media,
   or cache files. Keep source code and migrations in Git.
 

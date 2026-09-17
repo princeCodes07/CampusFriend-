@@ -1,7 +1,8 @@
 # CampusFriend
 
 Django foundation for a mobile-first student ecommerce and services application
-at KNUST Campus, Ghana. This repository currently contains setup only.
+at KNUST Campus, Ghana. Milestone 2 adds catalog models and Django Admin
+management to the initial foundation.
 
 ## Local Setup (Windows PowerShell)
 
@@ -48,7 +49,33 @@ explicitly for development. SQLite is the only configured database at this stage
 
 Visit http://127.0.0.1:8000/ for a plain setup placeholder and
 http://127.0.0.1:8000/admin/ for Django Admin. Stop the server with Ctrl+C.
-There are no application tests or ecommerce features yet.
+Catalog model and admin tests run with `manage.py test`. Storefront, cart,
+checkout, payments, and repair workflows are not implemented yet.
+
+## Manage the Catalog
+
+Sign in at `/admin/` and open **Store > Categories** or **Store > Products**.
+Create a category first, then add products with a unique SKU and a price in GHS.
+The product list supports search and category, availability, and featured filters.
+
+- Names and SKUs are required; category names, SKUs, and slugs are unique.
+- Slugs are prepopulated in the admin. On ordinary model saves, a blank slug is
+  generated from the name with a numeric suffix if needed. Renaming an item
+  preserves its slug; edit or clear the slug explicitly to change it.
+- Supply unique slugs explicitly for bulk inserts, which bypass model save hooks.
+  Database uniqueness is the final guard, including concurrent writes.
+- Prices use two decimal places and cannot be negative. Old price is optional;
+  no discount relationship between old and current price is required yet.
+- Stock is a nonnegative integer, defaulting to zero. `is_in_stock` means
+  `stock > 0`; availability and category activity remain separate controls.
+- Categories containing products cannot be deleted. Deactivate them or reassign
+  their products first.
+- Images and descriptions are optional. Uploaded images go into ignored
+  `media/products/` and their links work locally with DEBUG=True. Production
+  image hosting is deferred to the Cloudinary milestone.
+
+No sample records are seeded into the development database. Tests use a separate
+database and temporary image storage.
 
 ## Create Your Administrator
 
@@ -91,7 +118,8 @@ git push -u origin main
 ## Project Layout
 
 - `config/`: Django settings, URLs, WSGI and ASGI entry points.
-- `core/`, `accounts/`, `store/`, `orders/`, `repairs/`: app scaffolds.
+- `store/`: catalog models, admin configuration, migrations, and tests.
+- `core/`, `accounts/`, `orders/`, `repairs/`: existing app scaffolds.
 - `templates/base.html`: basic HTML shell.
 - `static/`: CSS, JavaScript, and an image directory placeholder.
 - `AGENTS.md`: permanent engineering instructions.

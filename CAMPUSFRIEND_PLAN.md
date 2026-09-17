@@ -69,9 +69,28 @@ Celery, or microservices unless explicitly requested.
   "Initialize CampusFriend Django project".
 - Configure a GitHub remote and push main only when the actual URL is supplied.
 
-Do not implement product/category models, cart, checkout, Paystack integration,
-orders, repair workflows, authentication UI, homepage design, product pages,
-search, or production deployment in this milestone.
+During Milestone 1, do not implement product/category models, cart, checkout,
+Paystack integration, orders, repair workflows, authentication UI, homepage
+design, product pages, search, or production deployment.
+
+## Milestone 2: Catalog Models and Django Admin
+
+Keep the existing project structure. Add Category and Product in the store app
+and make both manageable in Django Admin.
+
+- Category: unique name and slug, description, active flag, and timestamps.
+- Product: protected category relationship, name, unique slug and SKU,
+  descriptions, decimal price and nullable old price, integer stock, optional
+  image, availability/featured flags, and timestamps.
+- Reject negative prices and stock through validation and database constraints.
+- Generate missing slugs on ordinary saves, handle existing slug collisions,
+  preserve supplied slugs, and keep slugs stable when names change.
+- Provide useful string representations, name ordering, and an is_in_stock helper.
+- Add admin columns, search, filters, slug prepopulation, and category selection.
+- Create and inspect migrations, migrate locally, and run Django checks/tests.
+- Use isolated test data; do not introduce a fixture system or hardcoded products.
+- Do not implement cart, orders, checkout, payments, repair workflows, or
+  homepage design. Do not commit until the user reviews the result.
 
 ## Configuration and Secrets
 
