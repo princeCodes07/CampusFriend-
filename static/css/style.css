@@ -1,0 +1,16 @@
+/* Minimal foundation; the storefront design belongs to a later milestone. */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+main {
+  max-width: 60rem;
+  margin-inline: auto;
+  padding: 1rem;
+}

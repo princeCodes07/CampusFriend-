@@ -1,0 +1,19 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}CampusFriend{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="{% static 'js/main.js' %}" defer></script>
+  </head>
+  <body>
+    <main>
+      {% block content %}
+        <h1>CampusFriend</h1>
+        <p>For students at KNUST Campus, Ghana.</p>
+      {% endblock %}
+    </main>
+  </body>
+</html>
