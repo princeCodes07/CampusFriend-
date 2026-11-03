@@ -26,3 +26,28 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Local backups and database variants (keep data outside source control).
+/backups/
+/local-backups/
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+*.dump
+*.bak
+
+# Private keys and local service credentials.
+*.pem
+*.key
+
+# Tool caches and generated test coverage.
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage.*
+coverage.xml
+
+# Local reference document; not part of the application release.
+/static/images/SACSU_2026_2027_Revised_Budget.pdf
