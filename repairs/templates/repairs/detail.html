@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Repair {{ repair_request.reference }} | CampusFriend{% endblock %}
+
+{% block content %}
+<section class="container section">
+  <div class="section-heading">
+    <div>
+      <span class="eyebrow">Repair reference</span>
+      <h1>{{ repair_request.reference }}</h1>
+    </div>
+  </div>
+
+  <div class="repair-summary">
+    <p><strong>Request type:</strong> {{ repair_request.get_request_type_display }}</p>
+    {% if repair_request.service %}
+      <p><strong>Service:</strong> {{ repair_request.service.name }}</p>
+    {% endif %}
+    {% if repair_request.phone_model %}
+      <p><strong>Device:</strong> {{ repair_request.phone_model }}</p>
+    {% endif %}
+    {% if repair_request.request_type == "FIXED_PRICE_PHONE" %}
+      <p><strong>Price:</strong> GH₵ {{ repair_request.confirmed_price }}</p>
+      {% if price_changed %}
+        <p class="message error">The catalogue price or service availability changed. Review the current price before paying.</p>
+        {% if current_price %}
+          <p><strong>Current total:</strong> GH₵ {{ current_price }}</p>
+        {% endif %}
+        {% if repair_request.service and repair_request.phone_model %}
+          <a class="button button-secondary" href="{% url 'repairs:phone_service' repair_request.service.slug %}?phone_type={{ repair_request.phone_type }}&amp;phone_model={{ repair_request.phone_model.pk }}&amp;repair_reference={{ repair_request.reference }}">Review updated price</a>
+        {% endif %}
+      {% endif %}
+      <h2>Payment</h2>
+      {% if latest_payment.status == "PAID" %}
+        <p>Payment successful</p>
+        <p><strong>Payment status:</strong> Paid</p>
+      {% elif latest_payment.status == "PENDING" %}
+        <p>Payment pending</p>
+        {% if paystack_enabled and not price_changed %}
+          <form method="post" action="{% url 'repairs:paystack_initialize' repair_request.reference %}">
+            {% csrf_token %}
+            <button type="submit" class="button button-primary">Continue payment · GH₵ {{ latest_payment.amount }}</button>
+          </form>
+        {% elif not paystack_enabled %}
+          <p>Online payment is temporarily unavailable. Please contact CampusFriend.</p>
+        {% endif %}
+      {% elif latest_payment %}
+        <p>Payment failed. Retry is available.</p>
+        {% if paystack_enabled and not price_changed %}
+          <form method="post" action="{% url 'repairs:paystack_initialize' repair_request.reference %}">
+            {% csrf_token %}
+            <button type="submit" class="button button-primary">Retry payment · GH₵ {{ repair_request.confirmed_price }}</button>
+          </form>
+        {% elif not paystack_enabled %}
+          <p>Online payment is temporarily unavailable. Please contact CampusFriend.</p>
+        {% endif %}
+      {% elif paystack_enabled and not price_changed %}
+        <form method="post" action="{% url 'repairs:paystack_initialize' repair_request.reference %}">
+          {% csrf_token %}
+          <button type="submit" class="button button-primary">Pay GH₵ {{ repair_request.confirmed_price }}</button>
+        </form>
+      {% else %}
+        <p>Online payment is temporarily unavailable. Please contact CampusFriend.</p>
+      {% endif %}
+    {% else %}
+      <h2>Payment</h2>
+      <p>Payment is not required for this repair request yet. Our team will contact you first.</p>
+    {% endif %}
+    <p><strong>Status:</strong> {{ repair_request.get_status_display }}</p>
+    {% if repair_request.phone_number %}
+      <p><strong>Phone:</strong> {{ repair_request.phone_number }}</p>
+    {% endif %}
+
+    {% if repair_request.description %}
+      <p><strong>Problem:</strong> {{ repair_request.description }}</p>
+    {% endif %}
+
+    <div>
+      <h2>Status timeline</h2>
+      <ol>
+        {% for step in status_timeline %}
+          <li>{% if repair_request.status == step.code %}<strong>{{ step.label }}</strong>{% else %}{{ step.label }}{% endif %}</li>
+        {% empty %}
+          <li>Request submitted</li>
+        {% endfor %}
+      </ol>
+    </div>
+
+    <p>Typical repair turnaround is approximately 12–48 hours after the repair arrangement is confirmed.</p>
+  </div>
+</section>
+{% endblock %}

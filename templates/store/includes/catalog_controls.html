@@ -1,0 +1,11 @@
+<form class="catalog-controls" method="get" action="{{ filter_action }}" aria-label="Filter and sort products">
+  {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+  <div class="sort-control">
+    <label for="catalog-sort">Sort by</label>
+    <select id="catalog-sort" name="sort">
+      {% for value, label in sort_options %}<option value="{{ value }}"{% if sort == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </div>
+  <button class="button catalog-apply" type="submit">Apply</button>
+  {% if in_stock or sort != 'name' %}<a class="text-link" href="{% querystring sort=None in_stock=None page=None %}">Reset filters</a>{% endif %}
+</form>

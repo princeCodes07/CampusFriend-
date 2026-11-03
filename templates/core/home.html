@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<section class="home-hero" aria-labelledby="hero-title">
+    <div class="hero container">
+        <div class="hero-copy">
+            <h2 id="hero-title">Campus essentials,<span> made easy.</span></h2>
+            <p class="hero-description">Shop everyday essentials and explore reliable device repairs, all in one place.</p>
+            <div class="button-column">
+                <a class="button button-primary" href="{% url 'store:product_list' %}">Shop the store{% include 'includes/icon.html' with name='arrow' %}</a>
+                <a class="button button-outline" href="{% url 'repairs:home' %}">Explore repairs{% include 'includes/icon.html' with name='tool' %}</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="container home-categories"
+         id="categories"
+         aria-labelledby="categories-title">
+
+    <div class="section-heading home-category-heading">
+
+        <!-- Collapsible category section -->
+        <details class="home-category-dropdown">
+
+            <summary class="home-category-trigger"
+                     id="categories-title">
+
+                <span>Shop by category</span>
+
+                <span class="category-chevron"
+                      aria-hidden="true">⌄</span>
+
+            </summary>
+
+            <!-- Hidden until Shop by category is clicked -->
+            <div class="catalog-filter-panel home-category-toolbar">
+
+                <nav class="store-category-nav"
+                     aria-label="Store categories">
+
+                    {% for group in category_groups %}
+
+                        {% if group.section and group.categories %}
+
+                            {% for category in group.categories %}
+
+                                <a class="category-filter"
+                                   href="{% url 'store:category' category.slug %}">
+
+                                    {{ category.name }}
+
+                                </a>
+
+                            {% endfor %}
+
+                        {% endif %}
+
+                    {% empty %}
+
+                        <p class="catalog-note">
+                            Collections will appear here when products are available to browse.
+                        </p>
+
+                    {% endfor %}
+
+                </nav>
+
+                {% url 'store:product_list' as catalog_url %}
+
+                {% include 'store/includes/catalog_controls.html' with filter_action=catalog_url sort='name' %}
+
+            </div>
+
+        </details>
+
+        <!-- Always visible -->
+        <a class="text-link"
+           href="{% url 'store:product_list' %}">
+
+            All products
+
+            {% include 'includes/icon.html' with name='arrow' %}
+
+        </a>
+
+    </div>
+
+</section>
+
+<section class="container section featured-section home-product-section" aria-labelledby="featured-title">
+  <div class="section-heading">
+    <h2 id="featured-title">Featured products</h2>
+  </div>
+  <div class="product-grid">
+    {% for product in featured_products %}{% include 'store/includes/product_card.html' %}
+    {% empty %}<div class="commerce-state commerce-state--empty commerce-state--compact"><h3>Our featured selection is on its way.</h3><p>Explore the store to see the products currently listed.</p><div class="commerce-state-actions"><a class="text-link" href="{% url 'store:product_list' %}">Browse products {% include 'includes/icon.html' with name='arrow' %}</a></div></div>{% endfor %}
+  </div>
+  <div class="section-footer">
+    <a class="text-link" href="{% url 'store:product_list' %}">View the store {% include 'includes/icon.html' with name='arrow' %}</a>
+  </div>
+</section>
+{% if latest_products %}
+<section class="container section home-product-section" aria-labelledby="latest-title">
+  <div class="section-heading">
+    <h2 id="latest-title">Latest products</h2>
+  </div>
+  <div class="product-grid">{% for product in latest_products %}{% include 'store/includes/product_card.html' %}{% endfor %}</div>
+  <div class="section-footer">
+    <a class="text-link" href="{% url 'store:product_list' %}?sort=newest">Browse latest products {% include 'includes/icon.html' with name='arrow' %}</a>
+  </div>
+</section>
+{% endif %}
+<section class="container section" aria-labelledby="repairs-title">
+  <div class="repair-promotion">
+    <div class="repair-promotion-copy">
+      <div class="service-topline"><p class="eyebrow">CAMPUSFRIEND REPAIRS</p></div>
+      <h2 id="repairs-title">Keep your everyday tech going.</h2>
+      <p>Get repair support for the phones and gadgets.</p>
+      <a class="button button-primary" href="{% url 'repairs:home' %}">Explore CampusFriend Repairs {% include 'includes/icon.html' with name='arrow' %}</a>
+      <p class="repair-availability">Submit a repair request online and check its status from your repair page.</p>
+    </div>
+    <div class="repair-services">
+      <h3>Repair support</h3>
+      <ul>
+        <li>{% include 'includes/icon.html' with name='tool' %}Phone repairs</li>
+        <li>{% include 'includes/icon.html' with name='tool' %}Laptop issues</li>
+        <li>{% include 'includes/icon.html' with name='tool' %}All Electronic issues</li>
+        <li>{% include 'includes/icon.html' with name='tool' %}Software problems</li>
+      </ul>
+    </div>
+  </div>
+</section>
+{% if book_products %}
+<section class="container section home-product-section" aria-labelledby="books-title">
+  <div class="section-heading">
+    <h2 id="books-title">Books &amp; study materials</h2>
+  </div>
+  <div class="product-grid">{% for product in book_products %}{% include 'store/includes/product_card.html' %}{% endfor %}</div>
+  <div class="section-footer">
+    <a class="text-link" href="{% url 'store:books' %}">Browse Books {% include 'includes/icon.html' with name='arrow' %}</a>
+  </div>
+</section>
+{% endif %}
+<section class="container campus-note" aria-labelledby="campus-note-title">
+  <span class="community-icon">{% include 'includes/icon.html' with name='heart' %}</span>
+  <div><h2 id="campus-note-title">Built around student life.</h2><p>Everyday products, clear prices and availability, and more campus support as we grow.</p></div>
+  <a class="text-link" href="{% url 'store:product_list' %}">Explore the store {% include 'includes/icon.html' with name='arrow' %}</a>
+</section>
+{% endblock %}

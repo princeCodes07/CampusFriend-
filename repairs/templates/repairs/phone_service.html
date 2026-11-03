@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ service.name }} | Repairs | CampusFriend{% endblock %}
+
+{% block content %}
+<section class="container section">
+  <div class="section-heading">
+    <div>
+      <span class="eyebrow">Phone repair</span>
+      <h1>{{ service.name }}</h1>
+    </div>
+  </div>
+
+  {% if error_message %}
+    <p class="message error">{{ error_message }}</p>
+  {% endif %}
+
+  {% if success_message %}
+    <p class="message success">{{ success_message }}</p>
+  {% endif %}
+
+  {% if not selected_phone_type %}
+    <div class="category-grid">
+      <a class="category-card" href="?phone_type=IPHONE">
+        <span class="category-icon">📱</span>
+        <span>
+          <strong>iPhone</strong>
+          <small>Choose an iPhone model</small>
+        </span>
+        <span class="icon">→</span>
+      </a>
+      <a class="category-card" href="?phone_type=ANDROID">
+        <span class="category-icon">📲</span>
+        <span>
+          <strong>Android</strong>
+          <small>Choose a brand and model</small>
+        </span>
+        <span class="icon">→</span>
+      </a>
+    </div>
+  {% elif available_models %}
+    <form method="post" class="repair-form">
+      {% csrf_token %}
+      <input type="hidden" name="phone_type" value="{{ selected_phone_type }}">
+      <label for="phone_model">Choose device model</label>
+      <select id="phone_model" name="phone_model" required>
+        <option value="">Select a model</option>
+        {% for model in available_models %}
+          <option value="{{ model.pk }}" {% if selected_model and selected_model.pk == model.pk %}selected{% endif %}>{{ model }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="button button-primary">Check price</button>
+    </form>
+  {% else %}
+    <p>No models are currently available for this repair service. Please contact us.</p>
+  {% endif %}
+
+  {% if selected_model and price %}
+    <div class="repair-summary">
+      <h2>Repair</h2>
+      <p>{{ service.name }}</p>
+
+      <h2>Device</h2>
+      <p>{{ selected_phone_type_display }} — {{ selected_model }}</p>
+
+      <h2>Total</h2>
+      <p>GH₵ {{ price }}</p>
+
+      <form method="post" class="repair-form">
+        {% csrf_token %}
+        <input type="hidden" name="phone_type" value="{{ selected_phone_type }}">
+        <input type="hidden" name="phone_model" value="{{ selected_model.pk }}">
+        <input type="hidden" name="confirm_price" value="1">
+        {% if repair_reference %}<input type="hidden" name="repair_reference" value="{{ repair_reference }}">{% endif %}
+        <label for="repair_name">Name</label>
+        <input id="repair_name" name="name" value="{{ customer_name|default:'' }}" maxlength="150" required>
+        <label for="repair_phone">Phone number</label>
+        <input id="repair_phone" name="phone_number" value="{{ customer_phone|default:'' }}" maxlength="20" type="tel" required>
+        <label for="repair_email">Email for Paystack</label>
+        <input id="repair_email" name="email" value="{{ customer_email|default:'' }}" maxlength="254" type="email" required>
+        <button type="submit" class="button button-primary">Confirm price · GH₵ {{ price }}</button>
+      </form>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

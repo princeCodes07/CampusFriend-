@@ -42,7 +42,7 @@ class CatalogModelTests(TestCase):
         self.assertTrue(self.category.is_active)
         self.assertTrue(product.is_available)
         self.assertFalse(product.is_featured)
-        self.assertEqual(product.stock, 0)
+        self.assertIsNone(product.stock)
         self.assertIsNone(product.old_price)
         self.assertFalse(product.image)
         for item in (self.category, product):
@@ -121,7 +121,7 @@ class CatalogModelTests(TestCase):
         product.refresh_from_db()
         self.assertEqual(product.price, Decimal("25.50"))
         self.assertIsNone(product.old_price)
-        self.assertEqual(product.stock, 0)
+        self.assertIsNone(product.stock)
 
     def test_zero_prices_nullable_old_price_and_decimal_round_trip(self):
         product = self.make_product(price=Decimal("0.10"))
@@ -129,12 +129,61 @@ class CatalogModelTests(TestCase):
         product.refresh_from_db()
         self.assertEqual(product.price, Decimal("0.10"))
         product.price = Decimal("0.00")
-        product.old_price = Decimal("0.00")
+        product.old_price = None
         product.full_clean()
         product.save()
         product.refresh_from_db()
         self.assertEqual(product.price, Decimal("0.00"))
-        self.assertEqual(product.old_price, Decimal("0.00"))
+        self.assertIsNone(product.old_price)
+
+    def test_previous_price_must_be_strictly_greater_during_model_validation(self):
+        for previous in ("0.00", "20.00", "25.50"):
+            with self.subTest(previous=previous):
+                product = Product(category=self.category, name="Cable", sku="PREVIOUS", price="25.50", old_price=previous)
+                with self.assertRaises(ValidationError) as error:
+                    product.full_clean()
+                self.assertIn("old_price", error.exception.message_dict)
+        product.old_price = "30.00"
+        product.full_clean()
+        product.save()
+        product.refresh_from_db()
+        self.assertEqual(product.old_price, Decimal("30.00"))
+
+    def test_previous_price_constraint_covers_direct_writes_and_price_increases(self):
+        product = self.make_product(old_price=Decimal("30.00"))
+        for changes in ({"old_price": "0.00"}, {"old_price": "20.00"},
+                        {"old_price": "25.50"}, {"price": "30.00"}, {"price": "35.00"}):
+            with self.subTest(changes=changes):
+                with self.assertRaises(IntegrityError), transaction.atomic():
+                    Product.objects.filter(pk=product.pk).update(**changes)
+        Product.objects.filter(pk=product.pk).update(old_price=None, price="35.00")
+        product.refresh_from_db()
+        self.assertIsNone(product.old_price)
+        self.assertEqual(product.price, Decimal("35.00"))
+
+    def test_malformed_prices_report_validation_errors_without_comparison_crashes(self):
+        for field in ("price", "old_price"):
+            for value in ("not-a-price", "NaN", "Infinity"):
+                with self.subTest(field=field, value=value):
+                    product = Product(category=self.category, name="Cable", sku="INVALID-PRICE", price="25.50", old_price="30.00")
+                    setattr(product, field, value)
+                    with self.assertRaises(ValidationError) as error:
+                        product.full_clean()
+                    self.assertIn(field, error.exception.message_dict)
+
+    def test_featured_products_require_confirmed_positive_stock(self):
+        product = self.make_product(is_featured=True)
+        for stock in (None, 0):
+            with self.subTest(stock=stock):
+                product.stock = stock
+                with self.assertRaises(ValidationError) as error:
+                    product.full_clean()
+                self.assertIn("is_featured", error.exception.message_dict)
+        product.stock = 1
+        product.full_clean()
+        product.is_featured = False
+        product.stock = 0
+        product.full_clean()
 
     def test_stock_helper_is_independent_of_visibility(self):
         product = self.make_product(stock=1, is_available=False)
@@ -189,14 +238,20 @@ class CatalogAdminTests(TestCase):
 
     def test_category_can_be_created_and_edited(self):
         response = self.client.post(reverse("admin:store_category_add"), {
-            "name": "Books", "slug": "", "is_active": "on", "_save": "Save",
+            "name": "Books", "slug": "", "sort_order": "0",
+            "is_active": "on", "_save": "Save",
         })
         self.assertRedirects(response, reverse("admin:store_category_changelist"))
         category = Category.objects.get(name="Books")
         self.assertEqual(category.slug, "books")
         response = self.client.post(
             reverse("admin:store_category_change", args=[category.pk]),
-            {"name": "Personal-development books", "slug": "books", "_save": "Save"},
+            {
+                "name": "Personal-development books",
+                "slug": "books",
+                "sort_order": "0",
+                "_save": "Save",
+            },
         )
         self.assertEqual(response.status_code, 302)
         category.refresh_from_db()
@@ -221,7 +276,7 @@ class CatalogAdminTests(TestCase):
             reverse("admin:store_product_change", args=[product.pk]),
             self.product_data(
                 slug=product.slug, price="30.00", old_price="35.00", stock="0",
-                is_available="", is_featured="on",
+                is_available="", is_featured="",
             ),
         )
         self.assertEqual(response.status_code, 302)
@@ -230,7 +285,48 @@ class CatalogAdminTests(TestCase):
         self.assertEqual(product.old_price, Decimal("35.00"))
         self.assertFalse(product.is_in_stock)
         self.assertFalse(product.is_available)
+        self.assertFalse(product.is_featured)
+
+    def test_product_form_rejects_featuring_without_confirmed_stock(self):
+        for stock in ("0", ""):
+            with self.subTest(stock=stock):
+                response = self.client.post(reverse("admin:store_product_add"),
+                                            self.product_data(stock=stock, is_featured="on"))
+                self.assertEqual(response.status_code, 200)
+                self.assertIn("is_featured", response.context["adminform"].form.errors)
+                self.assertFalse(Product.objects.exists())
+        response = self.client.post(reverse("admin:store_product_add"),
+                                    self.product_data(stock="1", is_featured="on"))
+        self.assertEqual(response.status_code, 302)
+        product = Product.objects.get()
         self.assertTrue(product.is_featured)
+        response = self.client.post(reverse("admin:store_product_change", args=[product.pk]),
+                                    self.product_data(slug=product.slug, stock="0", is_featured="on"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("is_featured", response.context["adminform"].form.errors)
+        product.refresh_from_db()
+        self.assertEqual(product.stock, 1)
+
+    def test_bulk_featuring_skips_zero_and_unconfirmed_stock(self):
+        products = [Product.objects.create(category=self.category, name=f"Product {i}", sku=f"BULK-{i}",
+                                           price="10.00", stock=stock) for i, stock in enumerate((2, 0, None))]
+        response = self.client.post(reverse("admin:store_product_changelist"), {
+            "action": "feature_products", "_selected_action": [product.pk for product in products],
+        }, follow=True)
+        self.assertEqual(list(Product.objects.filter(is_featured=True)), products[:1])
+        self.assertContains(response, "Skipped 2 product(s) with zero or unconfirmed stock.")
+
+    def test_list_edit_cannot_feature_a_sold_out_product(self):
+        product = Product.objects.create(category=self.category, name="Sold out", sku="LIST-EDIT", price="10.00", stock=0)
+        response = self.client.post(reverse("admin:store_product_changelist"), {
+            "form-TOTAL_FORMS": "1", "form-INITIAL_FORMS": "1", "form-MAX_NUM_FORMS": "1000",
+            "form-0-id": str(product.pk), "form-0-stock": "0", "form-0-is_available": "on",
+            "form-0-is_featured": "on", "_save": "Save",
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("is_featured", response.context["cl"].formset.forms[0].errors)
+        product.refresh_from_db()
+        self.assertFalse(product.is_featured)
 
     def test_product_form_rejects_negative_and_fractional_stock_values(self):
         for field, value in [("price", "-0.01"), ("old_price", "-1.00"),
@@ -255,6 +351,15 @@ class CatalogAdminTests(TestCase):
         self.assertIn("sku", response.context["adminform"].form.errors)
         self.assertIn("slug", response.context["adminform"].form.errors)
         self.assertEqual(Product.objects.count(), 1)
+
+    def test_admin_rejects_previous_prices_at_or_below_current_price(self):
+        for old_price in ("0.00", "20.00", "25.50"):
+            with self.subTest(old_price=old_price):
+                response = self.client.post(reverse("admin:store_product_add"), self.product_data(old_price=old_price))
+                self.assertEqual(response.status_code, 200)
+                self.assertIn("old_price", response.context["adminform"].form.errors)
+                self.assertContains(response, "Previous price must be higher than the current price.")
+                self.assertFalse(Product.objects.exists())
 
     def test_non_image_upload_is_rejected(self):
         upload = SimpleUploadedFile("fake.png", b"not an image", content_type="image/png")

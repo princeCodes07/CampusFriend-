@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480" viewBox="0 0 480 480">
+<rect width="480" height="480" fill="#f0f3ed"/>
+<circle cx="240" cy="217" r="82" fill="#e6ebe0"/>
+<g fill="none" stroke="#8a9c8c" stroke-width="3" stroke-linejoin="round"><path d="m240 159 52 29v58l-52 29-52-29v-58l52-29Z"/><path d="m188 188 52 29 52-29m-52 29v58m-26-101 52 29v23"/></g>
+<text x="240" y="340" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#627265" letter-spacing="2">IMAGE COMING SOON</text>
+</svg>

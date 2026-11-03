@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% block title %}Order #{{ order.number }} | CampusFriend{% endblock %}
+{% block content %}
+<div class="container checkout-container order-detail-page">
+  <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="{% url 'store:product_list' %}">Store</a><span aria-hidden="true">/</span><a href="{% url 'orders:order_list' %}">My orders</a><span aria-hidden="true">/</span><span>{{ order.number }}</span></nav>
+  <header class="order-detail-header">
+    <a class="order-back-link" href="{% url 'orders:order_list' %}">← Back to my orders</a>
+    <div class="order-detail-heading">
+      <div>
+        <p class="eyebrow">THANK YOU, {{ order.customer_name }}</p>
+        <h1>Order <span class="order-reference">#{{ order.number }}</span></h1>
+        <p class="order-detail-reference">Your order request is saved<span aria-hidden="true">·</span>Placed {{ order.created_at|date:"d M Y, H:i" }}</p>
+      </div>
+    </div>
+  </header>
+  <aside class="cart-summary order-detail-summary" aria-labelledby="saved-summary-title">
+    <h2 id="saved-summary-title">Order summary</h2>
+    <div class="order-summary-content">
+      <div class="order-summary-pricing">
+        {% if order.delivery_area_name %}<p class="order-summary-location">{{ order.delivery_area_name }}</p>{% endif %}
+        {% include 'orders/includes/totals.html' with subtotal=order.subtotal delivery_fee=order.delivery_fee total=order.total delivery_fee_separate=order.delivery_fee_separate %}
+        {% if order.delivery_fee_separate %}<p>Delivery is not included in this payment. The delivery fee will be discussed and agreed with you separately.</p>{% endif %}
+        {% if order.delivery_fee == None %}<p>Delivery costs and the final total are still to be confirmed.</p>{% endif %}
+        {% if order.status == 'quote_pending' %}<p>Payment is unavailable until CampusFriend confirms your delivery quote and final total. Please wait for the agreed fee to appear here.</p>{% endif %}
+        {% if latest_payment.invalidated_at %}<p>The delivery quote has changed. Review the total above and start a new payment. If you already paid through an older link, contact CampusFriend with your payment reference.</p>{% endif %}
+      </div>
+      <div class="order-summary-payment">
+        {% if order.payment_status == 'paid' %}
+          <p class="payment-status payment-status--success" role="status"><strong>Payment received</strong></p>
+        {% elif payment_eligible %}
+          {% if paystack_enabled %}
+            <div class="payment-action">
+              <div>
+                <p class="eyebrow">Payment</p>
+                <h2>{% if latest_payment and latest_payment.status == 'pending' %}Continue payment{% elif latest_payment and latest_payment.status == 'abandoned' %}Try payment again{% elif latest_payment and latest_payment.status == 'failed' %}Try payment again{% else %}Complete your payment{% endif %}</h2>
+                <p>Pay securely through Paystack.</p>
+                {% if paystack_test_mode %}<p class="payment-mode-note">Paystack test mode is enabled.</p>{% endif %}
+              </div>
+              <form method="post" action="{% url 'orders:paystack_initialize' %}">
+                {% csrf_token %}
+                <input type="hidden" name="order_number" value="{{ order.number }}">
+                {% if not order.customer_email %}
+                  <label class="payment-email-label" for="payment-email">Email for your payment receipt</label>
+                  <input class="payment-email-input" id="payment-email" name="email" type="email" autocomplete="email" required>
+                {% else %}
+                  <p class="payment-email-note">Receipt email: {{ order.customer_email }}</p>
+                {% endif %}
+                <button class="button button-primary" type="submit">{% if latest_payment and latest_payment.status == 'pending' %}Continue payment{% elif latest_payment and latest_payment.status == 'abandoned' %}Try payment again{% elif latest_payment and latest_payment.status == 'failed' %}Try payment again{% else %}Pay now · GH₵ {{ order.total|floatformat:2 }}{% endif %}</button>
+              </form>
+            </div>
+          {% else %}
+            <p class="payment-unavailable">Online payment is not configured right now. Please contact CampusFriend to arrange payment.</p>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+    <p>Keep your reference. You can revisit this order while this browser’s session remains active.</p>
+    <a class="text-link" href="{% url 'store:product_list' %}">Continue shopping</a>
+  </aside>
+  <section class="order-state-panel" aria-label="Order status and payment status">
+    <section class="order-current-status" aria-labelledby="order-status-title">
+      <h2 id="order-status-title" class="order-state-title">Order status</h2>
+      <p class="order-status-value">
+        <span class="order-status-badge order-status-badge--{{ order.status_tone }}">{{ order.status_label }}</span>
+      </p>
+      <p>Order fulfilment is tracked separately from payment.</p>
+    </section>
+    <section class="order-payment-status" aria-labelledby="payment-status-title">
+      <h2 id="payment-status-title" class="order-state-title">Payment</h2>
+      {% if order.payment_status == 'paid' %}
+        <p class="payment-state payment-state--success"><span aria-hidden="true">✓</span> Paid</p>
+        {% if successful_payment %}<p class="payment-reference">Paystack reference: {{ successful_payment.reference }}</p>{% endif %}
+        <p>Payment has been received. Order fulfilment status is shown separately.</p>
+      {% elif latest_payment and latest_payment.status == 'pending' %}
+        <p class="payment-state payment-state--pending"><span aria-hidden="true">○</span> Pending</p>
+        <p>Payment pending. Your order has been created, but payment has not been completed. This payment attempt is still pending.</p>
+      {% elif latest_payment and latest_payment.status == 'abandoned' %}
+        <p class="payment-state payment-state--incomplete"><span aria-hidden="true">○</span> Payment not completed</p>
+        <p>No payment has been confirmed; you can try again using the payment button above.</p>
+      {% elif latest_payment and latest_payment.status == 'failed' %}
+        <p class="payment-state payment-state--failed"><span aria-hidden="true">○</span> Payment failed</p>
+        <p>Paystack reported that this payment failed. You can try again using the payment button above.</p>
+      {% else %}
+        <p class="payment-state payment-state--pending"><span aria-hidden="true">○</span> Pending</p>
+        <p>Your order has been created, but payment has not been completed. No payment has been taken.</p>
+      {% endif %}
+    </section>
+  </section>
+  <section class="order-tracking" aria-labelledby="order-tracking-title">
+    <header class="order-tracking-header">
+      <div>
+        <p class="eyebrow">Order tracking</p>
+        <h2 id="order-tracking-title">Status progression</h2>
+      </div>
+      <p class="order-tracking-note">This timeline shows order status, not a live courier location.</p>
+    </header>
+    <ol class="order-status-progress" aria-label="Order status progression">
+      {% for event in status_history %}
+        <li class="order-status-step order-status-step--{% if forloop.last and status_history_matches_current %}current{% else %}complete{% endif %}"{% if forloop.last and status_history_matches_current %} aria-current="step"{% endif %}>
+          <span class="order-status-step-marker" aria-hidden="true"></span>
+          <span class="order-status-step-content">
+            <strong>{{ event.get_status_display }}</strong>
+            <time datetime="{{ event.created_at|date:'c' }}">{{ event.created_at|date:"d M Y, H:i" }}</time>
+            {% if forloop.last and status_history_matches_current %}<span class="visually-hidden"> — Current status</span>{% else %}<span class="visually-hidden"> — Recorded status</span>{% endif %}
+          </span>
+        </li>
+      {% endfor %}
+      {% if not status_history %}
+        <li class="order-status-step order-status-step--current" aria-current="step">
+          <span class="order-status-step-marker" aria-hidden="true"></span>
+          <span class="order-status-step-content">
+            <strong>{{ order.status_label }}</strong>
+            <span class="order-history-note">Status history is unavailable for this order.</span>
+            <span class="visually-hidden"> — Current status</span>
+          </span>
+        </li>
+      {% elif not status_history_matches_current %}
+        <li class="order-status-step order-status-step--current" aria-current="step">
+          <span class="order-status-step-marker" aria-hidden="true"></span>
+          <span class="order-status-step-content">
+            <strong>{{ order.status_label }}</strong>
+            <span class="order-history-note">This current status has not yet been recorded in the history.</span>
+            <span class="visually-hidden"> — Current status</span>
+          </span>
+        </li>
+      {% endif %}
+    </ol>
+  </section>
+  <div class="order-detail-layout">
+    <section class="checkout-details order-detail-main" aria-labelledby="saved-items-title">
+      <h2 id="saved-items-title">Your items</h2>
+      <ul class="checkout-items saved-items order-detail-items">
+        {% for item in order.items.all %}<li><div><strong>{{ item.product_name }}</strong><span>SKU: {{ item.sku }}</span><span>{{ item.quantity }} × GH₵ {{ item.unit_price|floatformat:2 }}</span></div><strong>GH₵ {{ item.line_total|floatformat:2 }}</strong></li>{% endfor %}
+      </ul>
+      <h2 id="delivery-details-title">Delivery details</h2>
+      <dl class="delivery-details order-delivery-details" aria-labelledby="delivery-details-title">
+        {% if not order.delivery_area %}<div><dt>Method</dt><dd>{{ order.get_delivery_method_display }}</dd></div>{% endif %}
+        {% if order.delivery_area_name %}<div><dt>Selected location</dt><dd>{{ order.delivery_area_name }}</dd></div>{% endif %}
+        <div><dt>Name</dt><dd>{{ order.customer_name }}</dd></div>
+        <div><dt>Phone</dt><dd>{{ order.customer_phone }}</dd></div>
+        {% if order.customer_email %}<div><dt>Email</dt><dd>{{ order.customer_email }}</dd></div>{% endif %}
+        {% if order.delivery_location %}<div><dt>Location</dt><dd>{{ order.delivery_location }}</dd></div>{% endif %}
+        {% if order.landmark %}<div><dt>Landmark</dt><dd>{{ order.landmark }}</dd></div>{% endif %}
+        {% if order.delivery_notes %}<div><dt>Notes</dt><dd>{{ order.delivery_notes|linebreaksbr }}</dd></div>{% endif %}
+      </dl>
+    </section>
+  </div>
+</div>
+{% endblock %}

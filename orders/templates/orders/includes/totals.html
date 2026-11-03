@@ -1,0 +1,5 @@
+<dl class="order-totals">
+  <div class="checkout-total-row"><dt>Items subtotal</dt><dd>GH₵ {{ subtotal|floatformat:2 }}</dd></div>
+  {% if not delivery_fee_separate %}<div class="checkout-total-row"><dt>Delivery</dt><dd>{% if delivery_fee == None %}To be confirmed{% else %}GH₵ {{ delivery_fee|floatformat:2 }}{% endif %}</dd></div>{% endif %}
+  <div class="checkout-total-row checkout-total-row--grand order-total"><dt>{% if delivery_fee_separate %}Items total (delivery separate){% else %}Final total{% endif %}</dt><dd>{% if total == None %}To be confirmed{% else %}GH₵ {{ total|floatformat:2 }}{% endif %}</dd></div>
+</dl>

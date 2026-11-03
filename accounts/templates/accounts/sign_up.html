@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Sign up | CampusFriend{% endblock %}
+{% block content %}
+<section class="container account-section" aria-labelledby="account-title">
+  <div class="account-panel">
+    <h1 id="account-title">Create your account</h1>
+    <p>Choose a username and password to get started.</p>
+    <form method="post" action="{% url 'accounts:signup' %}" class="account-form">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      {% include 'accounts/form_fields.html' %}
+      <button class="button button-primary" type="submit">Sign up</button>
+    </form>
+    <p class="account-switch">Already have an account? <a href="{% url 'accounts:login' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Sign in</a></p>
+    <a class="text-link" href="{% url 'store:product_list' %}">Continue shopping as a guest</a>
+  </div>
+</section>
+{% endblock %}

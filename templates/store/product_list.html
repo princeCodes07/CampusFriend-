@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}{% if query %}Search results for {{ query }}{% elif is_books %}Books &amp; Study Materials{% elif department %}{{ department.name }}{% elif category %}{{ category.name }}{% else %}Store{% endif %} | CampusFriend{% endblock %}
+{% block content %}
+<section class="catalog-header"><div class="container category-hero">
+  <p class="eyebrow">{% if is_books %}YOUR NEXT CHAPTER{% else %}GOOD FINDS. CAMPUS VIBES.{% endif %}</p>
+  <h1>{% if query %}Search results for “{{ query }}”{% elif is_books %}A little reading. A bigger world.{% elif department %}{{ department.name }}{% elif category %}{{ category.name }}{% else %}Everyday essentials, sorted.{% endif %}</h1>
+  <p>{% if query %}Find a little more of what you're looking for.{% elif category.description %}{{ category.description }}{% elif is_books %}Books for fresh perspectives, better habits and the journey ahead.{% else %}From your first lecture to your last playlist. Find what fits your day.{% endif %}</p>
+</div></section>
+<section class="container catalog-section" aria-label="Product catalog">
+  <div class="catalog-filter-panel">
+    <nav class="store-category-nav" aria-label="Product categories">
+      <a
+          class="category-all"
+          href="{% url 'store:product_list' %}"
+          {% if not category and not is_books %}
+              aria-current="page"
+          {% endif %}
+      >
+          All products
+      </a>
+      {% for group in category_groups %}
+        {% if not group.is_duplicate_parent %}
+          {% for item in group.categories %}
+            <a
+                class="category-filter"
+                href="{% url 'store:category' item.slug %}"
+                {% if category.pk == item.pk %}
+                    aria-current="page"
+                {% endif %}
+            >
+              {{ item.name }}
+            </a>
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+    </nav>
+    {% include 'store/includes/catalog_controls.html' with filter_action=request.path %}
+  </div>
+  <div class="catalog-summary"><p>{% if page_obj.paginator.count %}Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} product{{ page_obj.paginator.count|pluralize }}{% else %}0 products{% endif %}</p>{% if query and page_obj.paginator.count %}<a class="text-link" href="{{ request.path }}">Clear search {% include 'includes/icon.html' with name='close' %}</a>{% elif not query %}<span>Thoughtfully picked for campus life</span>{% endif %}</div>
+  <div class="product-grid">
+    {% for product in page_obj %}{% include 'store/includes/product_card.html' %}
+    {% empty %}
+      <div class="commerce-state commerce-state--empty">
+        <div class="commerce-state-icon" aria-hidden="true">{% include 'includes/icon.html' with name='search' %}</div>
+        {% if query %}
+          <h2>No results for “{{ query }}”</h2>
+          <p>Try a different search term, clear your search, or browse the full catalog.</p>
+        {% elif in_stock %}
+          <h2>No products match these filters</h2>
+          <p>Try turning off the in-stock filter or clear your filters to see more products.</p>
+        {% elif is_books %}
+          <h2>Your next chapter is on its way</h2>
+          <p>Our book collection is being put together. Explore the rest of the shop in the meantime.</p>
+        {% elif category or department %}
+          <h2>This collection is getting ready</h2>
+          <p>There are no products to browse in this collection yet. Check back soon or explore the full catalog.</p>
+        {% else %}
+          <h2>No products found</h2>
+          <p>We're filling the shelves. Check back soon for accessories, books and more, or browse the full catalog.</p>
+        {% endif %}
+        <div class="commerce-state-actions">
+          {% if query %}
+            <a class="button button-primary" href="{{ request.path }}">Clear search</a>
+            {% if category or is_books or department %}
+              <a class="button button-outline" href="{% url 'store:product_list' %}">Browse all products</a>
+            {% endif %}
+          {% else %}
+            <a class="button button-primary" href="{% url 'store:product_list' %}">View all products</a>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% include 'store/includes/pagination.html' %}
+</section>
+{% endblock %}

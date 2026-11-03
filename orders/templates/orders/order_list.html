@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}My orders | CampusFriend{% endblock %}
+{% block content %}
+<section class="container order-list-page">
+  <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="{% url 'core:home' %}">Home</a><span aria-hidden="true">/</span><span>My orders</span></nav>
+  <header class="order-list-header">
+    <p class="eyebrow">YOUR CAMPUS FINDS</p>
+    <h1>My orders</h1>
+    <p>Review order requests saved in this browser and their latest status.</p>
+  </header>
+  {% if orders %}
+    <div class="order-list">
+      {% for order in orders %}
+        <a class="order-card" href="{{ order.get_absolute_url }}">
+          <div class="order-card-main">
+            <div>
+              <span class="order-card-label">Order reference</span>
+              <strong class="order-card-reference">#{{ order.number }}</strong>
+            </div>
+            <span class="order-status-badge order-status-badge--{{ order.status_tone }}">{{ order.status_label }}</span>
+          </div>
+          <div class="order-card-meta">
+            <span>{{ order.created_at|date:"d M Y" }}</span>
+            <span>{{ order.items.count }} item{{ order.items.count|pluralize }}</span>
+            <strong>{% if order.total != None %}GH₵ {{ order.total|floatformat:2 }}{% if order.delivery_fee_separate %} · Delivery separate{% endif %}{% else %}Total to be confirmed{% endif %}</strong>
+          </div>
+          <span class="order-card-action">View order {% include 'includes/icon.html' with name='arrow' %}</span>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="commerce-state commerce-state--empty order-list-empty">
+      <div class="commerce-state-icon" aria-hidden="true">{% include 'includes/icon.html' with name='bag' %}</div>
+      <h2>No orders yet</h2>
+      <p>You haven't placed an order in this browser yet. Browse the store to find something for campus life.</p>
+      <div class="commerce-state-actions">
+        <a class="button button-primary" href="{% url 'store:product_list' %}">Browse the store</a>
+      </div>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

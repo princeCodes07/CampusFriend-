@@ -1,0 +1,19 @@
+{% extends 'admin/base_site.html' %}
+{% load static %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'admin/css/forms.css' %}">{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="{% url 'admin:index' %}">Home</a> &rsaquo; <a href="{% url 'admin:orders_order_changelist' %}">Orders</a> &rsaquo; <a href="{{ change_url }}">{{ order.number }}</a> &rsaquo; Confirm delivery quote</div>{% endblock %}
+{% block content %}
+  <p>{{ order.get_delivery_method_display }} · Items subtotal: <strong>GH₵ {{ order.subtotal|floatformat:2 }}</strong></p>
+  {% if order.delivery_area_name %}<p>Selected location: {{ order.delivery_area_name }}. Changing this quote affects this order only.</p>{% endif %}
+  {% if order.delivery_fee != None %}<p>Current delivery fee: GH₵ {{ order.delivery_fee|floatformat:2 }} · Final total: GH₵ {{ order.total|floatformat:2 }}</p>{% endif %}
+  {% if order.delivery_location %}<p>{{ order.delivery_location }}{% if order.landmark %} · {{ order.landmark }}{% endif %}</p>{% endif %}
+  <p>Confirm or update the agreed delivery fee. This keeps the order Awaiting payment. Changing the fee invalidates all unpaid payment attempts; the customer must start payment again from the order page. It does not record a payment or reserve stock. Paid orders require a separate adjustment workflow.</p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <fieldset class="module aligned">
+      <div class="form-row">{{ form.delivery_fee.errors }}{{ form.delivery_fee.label_tag }}{{ form.delivery_fee }}<div class="help">{{ form.delivery_fee.help_text }}</div></div>
+    </fieldset>
+    <div class="submit-row"><input type="submit" class="default" value="Confirm quote and calculate total"><a href="{{ change_url }}">Back to order</a></div>
+  </form>
+{% endblock %}

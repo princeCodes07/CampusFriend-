@@ -1,0 +1,112 @@
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-about">
+      <a class="brand" href="{% url 'core:home' %}"><span class="brand-mark" aria-hidden="true">cf<span>.</span></span><span>CampusFriend</span></a>
+      <p>Student Needs, Delivered Fast.<br>Your Trustworthy Friend On Campus.</p>
+      <span class="footer-location">{% include 'includes/icon.html' with name='pin' %} KNUST Campus, Ghana</span>
+    </div>
+    <div>
+      <h2>Explore</h2>
+      <a href="{% url 'store:product_list' %}">Store</a>
+      <a href="{% url 'store:books' %}">Books for your next chapter</a>
+      <a href="{% url 'core:home' %}#categories">Browse categories</a>
+    </div>
+    <div>
+      <h2>Campus support</h2>
+      <a href="{% url 'repairs:home' %}">Gadget repairs</a>
+      <a href="{% url 'orders:order_list' %}">Track an order</a>
+      <p>Guest order requests are open. Check your order page for status updates and available payment options.</p>
+    </div>
+
+
+<div class="footer-contact">
+
+    <h2>Let's stay in touch</h2>
+
+    <!-- Business contact information -->
+    {% if business_contact.phone or business_contact.whatsapp or business_contact.email %}
+
+        <dl class="footer-contact-details">
+
+            {% if business_contact.phone %}
+                <dt>Phone</dt>
+                <dd>
+                    <a href="tel:{{ business_contact.phone }}">
+                        {% include 'includes/icon.html' with name='phone' %}
+                        {{ business_contact.phone }}
+                    </a>
+                </dd>
+            {% endif %}
+
+            {% if business_contact.whatsapp %}
+                <dt>WhatsApp</dt>
+                <dd>{{ business_contact.whatsapp }}</dd>
+            {% endif %}
+
+            {% if business_contact.email %}
+                <dt>Email</dt>
+                <dd>
+                    <a href="mailto:{{ business_contact.email }}">
+                        {{ business_contact.email }}
+                    </a>
+                </dd>
+            {% endif %}
+
+        </dl>
+
+    {% endif %}
+
+    <!-- Admin-managed social media links -->
+
+    <div class="footer-social-links">
+
+        {% if business_contact.instagram_url %}
+            <a href="{{ business_contact.instagram_url }}"
+               target="_blank"
+               rel="noopener noreferrer">
+                <i class="bi bi-instagram" aria-hidden="true"></i>
+                <span>Follow us on Instagram</span>
+            </a>
+        {% endif %}
+
+        {% if business_contact.tiktok_url %}
+            <a href="{{ business_contact.tiktok_url }}"
+               target="_blank"
+               rel="noopener noreferrer">
+                <i class="bi bi-tiktok" aria-hidden="true"></i>
+                <span>Follow us on TikTok</span>
+            </a>
+        {% endif %}
+
+        {% if business_contact.snapchat_url %}
+            <a href="{{ business_contact.snapchat_url }}"
+               target="_blank"
+               rel="noopener noreferrer">
+                <i class="bi bi-snapchat" aria-hidden="true"></i>
+                <span>Follow us on Snapchat</span>
+            </a>
+        {% endif %}
+
+        {% if business_contact.whatsapp_chat_url %}
+            <a href="{{ business_contact.whatsapp_chat_url }}"
+               target="_blank"
+               rel="noopener noreferrer">
+                <i class="bi bi-whatsapp" aria-hidden="true"></i>
+                <span>Text us on WhatsApp</span>
+            </a>
+        {% endif %}
+
+        {% if business_contact.whatsapp_channel_url %}
+            <a href="{{ business_contact.whatsapp_channel_url }}"
+               target="_blank"
+               rel="noopener noreferrer">
+                <i class="bi bi-whatsapp" aria-hidden="true"></i>
+                <span>Follow our WhatsApp Channel</span>
+            </a>
+        {% endif %}
+
+    </div>
+
+</div>
+  </div>
+</footer>

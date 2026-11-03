@@ -1,0 +1,159 @@
+{
+  "_instructions": "EDIT OR ADD YOUR PRODUCTS in this list. Prices are owner-supplied GHS amounts. Stock null means availability unconfirmed; replace it with an actual quantity when known. Validate with manage.py import_products catalog/products.json --dry-run, then import without --dry-run. Upload photos in Admin. See catalog/README.md.",
+  "products": [
+    {
+      "sku": "CF-PB-20000",
+      "name": "20,000mAh Power Bank",
+      "category": "accessories",
+      "price": "200.00",
+      "stock": null,
+      "short_description": "Power bank with a 20,000mAh capacity.",
+      "description": "Power bank with a 20,000mAh capacity.",
+      "is_available": true,
+      "is_featured": true
+    },
+    {
+      "sku": "CF-PB-30000",
+      "name": "30,000mAh Power Bank",
+      "category": "accessories",
+      "price": "250.00",
+      "stock": null,
+      "short_description": "Power bank with a 30,000mAh capacity.",
+      "description": "Power bank with a 30,000mAh capacity.",
+      "is_available": true,
+      "is_featured": true
+    },
+    {
+      "sku": "CF-PB-40000",
+      "name": "40,000mAh Power Bank",
+      "category": "accessories",
+      "price": "300.00",
+      "stock": null,
+      "short_description": "Power bank with a 40,000mAh capacity.",
+      "description": "Power bank with a 40,000mAh capacity.",
+      "is_available": true,
+      "is_featured": false
+    },
+    {
+      "sku": "CF-PB-50000",
+      "name": "50,000mAh Power Bank",
+      "category": "accessories",
+      "price": "350.00",
+      "stock": null,
+      "short_description": "Power bank with a 50,000mAh capacity.",
+      "description": "Power bank with a 50,000mAh capacity.",
+      "is_available": true,
+      "is_featured": false
+    },
+    {
+      "sku": "CF-AIRPODS-PRO",
+      "name": "AirPods Pro",
+      "category": "accessories",
+      "price": "150.00",
+      "stock": null,
+      "short_description": "AirPods Pro earbuds.",
+      "description": "AirPods Pro earbuds.",
+      "is_available": true,
+      "is_featured": true
+    },
+    {
+      "sku": "CF-AIRPODS-PRO-2",
+      "name": "AirPods Pro 2",
+      "category": "accessories",
+      "price": "180.00",
+      "stock": null,
+      "short_description": "AirPods Pro 2 earbuds.",
+      "description": "AirPods Pro 2 earbuds.",
+      "is_available": true,
+      "is_featured": false
+    },
+    {
+      "sku": "CF-AIRPODS-3",
+      "name": "AirPods 3",
+      "category": "accessories",
+      "price": "160.00",
+      "stock": null,
+      "short_description": "AirPods 3 earbuds.",
+      "description": "AirPods 3 earbuds.",
+      "is_available": true,
+      "is_featured": false
+    },
+    {
+      "sku": "CF-AIRPODS-4",
+      "name": "AirPods 4",
+      "category": "accessories",
+      "price": "202.00",
+      "stock": null,
+      "short_description": "AirPods 4 earbuds.",
+      "description": "AirPods 4 earbuds.",
+      "is_available": true,
+      "is_featured": true
+    },
+    {
+      "sku": "CF-SCREEN-PRIVACY",
+      "name": "Privacy Screen Protector",
+      "category": "accessories",
+      "price": "20.00",
+      "stock": null,
+      "short_description": "Privacy screen protector. Confirm the fit for your device before ordering.",
+      "description": "Privacy screen protector. Confirm the fit for your device before ordering.",
+      "is_available": true,
+      "is_featured": true
+    },
+    {
+      "sku": "CF-SCREEN-STANDARD",
+      "name": "Standard Screen Protector",
+      "category": "accessories",
+      "price": "10.00",
+      "stock": null,
+      "short_description": "Standard screen protector. Confirm the fit for your device before ordering.",
+      "description": "Standard screen protector. Confirm the fit for your device before ordering.",
+      "is_available": true,
+      "is_featured": false
+    },
+    {
+      "sku": "CF-HEADPHONE-JBL",
+      "name": "JBL Headphones",
+      "category": "accessories",
+      "price": "200.00",
+      "stock": null,
+      "short_description": "JBL headphones. Exact model and specifications to be confirmed.",
+      "description": "JBL headphones. Exact model and specifications to be confirmed.",
+      "is_available": true,
+      "is_featured": true
+    },
+    {
+      "sku": "CF-HEADPHONE-BOSE",
+      "name": "Bose Headphones",
+      "category": "accessories",
+      "price": "200.00",
+      "stock": null,
+      "short_description": "Bose headphones. Exact model and specifications to be confirmed.",
+      "description": "Bose headphones. Exact model and specifications to be confirmed.",
+      "is_available": true,
+      "is_featured": true
+    },
+    {
+      "sku": "CF-HEADPHONE-AIRPODS-MAX",
+      "name": "AirPods Max",
+      "category": "accessories",
+      "price": "200.00",
+      "stock": null,
+      "short_description": "AirPods Max headphones.",
+      "description": "AirPods Max headphones.",
+      "is_available": true,
+      "is_featured": false
+    },
+    {
+      "sku": "CF-HEADPHONE-SONY",
+      "name": "Sony Headphones",
+      "category": "accessories",
+      "price": "200.00",
+      "stock": null,
+      "short_description": "Sony headphones. Exact model and specifications to be confirmed.",
+      "description": "Sony headphones. Exact model and specifications to be confirmed.",
+      "is_available": true,
+      "is_featured": true
+    }
+  ]
+}

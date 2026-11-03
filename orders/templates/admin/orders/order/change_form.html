@@ -1,0 +1,5 @@
+{% extends 'admin/change_form.html' %}
+{% block object-tools-items %}
+  {% if can_confirm_quote %}<li><a href="{% url 'admin:orders_order_quote' original.pk %}">{% if original.status == 'quote_pending' %}Confirm delivery quote{% else %}Update delivery quote{% endif %}</a></li>{% endif %}
+  {{ block.super }}
+{% endblock %}

@@ -1,0 +1,3 @@
+{% extends 'base.html' %}
+{% block title %}Page not found | CampusFriend{% endblock %}
+{% block content %}<section class="container coming-soon"><p class="eyebrow">404 · A LITTLE OFF COURSE</p><h1>Let's get you back to campus.</h1><p class="coming-description">This page or product isn't available. There's still plenty to explore.</p><a class="button button-primary" href="{% url 'store:product_list' %}">Back to the shop {% include 'includes/icon.html' with name='arrow' %}</a></section>{% endblock %}

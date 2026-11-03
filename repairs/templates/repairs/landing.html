@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Repairs | CampusFriend{% endblock %}
+
+{% block content %}
+<section class="container section">
+  <div class="section-heading">
+    <div>
+      <h1>Repairs</h1>
+    </div>
+    <p>Choose the repair type that best matches your device or issue.</p>
+  </div>
+
+  <div class="category-grid">
+    <a class="category-card" href="#phone-services">
+      <span class="category-icon"></span>
+      <span>
+        <strong>Phone Repairs</strong>
+        <small>Screen, charging, speaker and other common phone issues</small>
+      </span>
+      <span class="icon">→</span>
+    </a>
+
+    <a class="category-card" href="{% url 'repairs:laptop_request' %}">
+      <span class="category-icon">💻</span>
+      <span>
+        <strong>Laptop Repairs</strong>
+        <small>Request-based laptop diagnostics and repair support</small>
+      </span>
+      <span class="icon">→</span>
+    </a>
+
+    <a class="category-card" href="{% url 'repairs:electronics_request' %}">
+      <span class="category-icon">🔧</span>
+      <span>
+        <strong>{{ 'Accessories & Electronics Repair'|safe }}</strong>
+        <small>Chargers, gadgets and other electronics fixes</small>
+      </span>
+      <span class="icon">→</span>
+    </a>
+  </div>
+
+  <div class="section" id="phone-services" style="margin-top: 28px;">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Available now</span>
+        <h2>Phone services</h2>
+      </div>
+    </div>
+
+    <div class="category-grid">
+      {% for service in services %}
+        <a class="category-card" href="{% if service.priceable and service.slug in fixed_price_service_slugs %}{% url 'repairs:phone_service' service.slug %}{% else %}{% url 'repairs:special_phone_request' %}{% endif %}">
+          <span class="category-icon">🛠️</span>
+          <span>
+            <strong>{{ service.name }}</strong>
+            <small>{% if service.priceable and service.slug in fixed_price_service_slugs %}Priceable repair{% else %}Request-based repair{% endif %}</small>
+          </span>
+          <span class="icon">→</span>
+        </a>
+      {% empty %}
+        <p>No active repair services are available right now.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

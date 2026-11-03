@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ product.name }} | CampusFriend{% endblock %}
+{% block description %}{% if product.short_description %}{{ product.short_description }}{% else %}Explore {{ product.name }} from {{ product.category.name }} at CampusFriend.{% endif %}{% endblock %}
+{% block content %}
+<div class="container detail-container">
+  <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="{% url 'core:home' %}">Home</a><span aria-hidden="true">/</span><a href="{% url 'store:product_list' %}">Store</a><span aria-hidden="true">/</span><a href="{% url 'store:category' product.category.slug %}">{{ product.category.name }}</a></nav>
+  <article class="product-detail">
+    <div class="detail-image">{% if product.is_featured and product.is_in_stock %}<span class="product-badge">Campus pick</span>{% endif %}{% if product.image %}<img src="{{ product.image.url }}" width="700" height="700" alt="{{ product.name }}" fetchpriority="high" data-product-image data-fallback="{% static 'images/product-placeholder.svg' %}">{% else %}<img class="placeholder-image" src="{% static 'images/product-placeholder.svg' %}" width="700" height="700" alt="Image coming soon for {{ product.name }}">{% endif %}</div>
+    <div class="detail-copy"><a class="eyebrow" href="{% url 'store:category' product.category.slug %}">{{ product.category.name }}</a><h1>{{ product.name }}</h1><p class="sku">SKU: {{ product.sku }}</p>
+      <div class="detail-price price-row"><span class="price">GH₵ {{ product.price|floatformat:2 }}</span>{% if product.old_price != None and product.old_price > product.price %}<del><span class="visually-hidden">Previous price </span>GH₵ {{ product.old_price|floatformat:2 }}</del>{% endif %}</div>
+      <p class="stock-status {% if product.stock == None %}stock-unconfirmed{% elif not product.is_in_stock %}out-of-stock{% endif %}"><span aria-hidden="true"></span>{% if product.stock == None %}Availability to be confirmed{% elif product.is_in_stock %}In stock · {{ product.stock }} available{% else %}Out of stock{% endif %}</p>
+      {% if product.is_demo %}<p class="sample-notice">Sample listing for preview. Price and stock are illustrative.</p>{% endif %}
+      {% if product.short_description %}<p class="detail-intro">{{ product.short_description }}</p>{% endif %}
+      <form class="purchase-form product-purchase" method="post" action="{% url 'orders:cart_add' product.pk %}">
+        {% csrf_token %}
+        <div class="product-purchase-row">
+          <div class="quantity-control">
+            <label for="quantity">Quantity</label>
+            <input id="quantity" name="quantity" type="number" min="1" value="1" inputmode="numeric" {% if product.is_in_stock %}max="{{ product.stock }}" required{% else %}disabled{% endif %} aria-label="Quantity" aria-describedby="ordering-note">
+          </div>
+          <button class="product-add-to-cart button button-primary" type="submit" {% if not product.is_in_stock %}disabled{% endif %} aria-describedby="ordering-note">
+            {% include 'includes/icon.html' with name='bag' %}
+            <span>{% if product.stock == None %}Availability pending{% elif product.is_in_stock %}Add to cart{% else %}Out of stock{% endif %}</span>
+          </button>
+        </div>
+        <p class="purchase-note" id="ordering-note">{% if product.stock == None %}We’re confirming stock for this product. Please check back soon.{% elif not product.is_in_stock %}This product is out of stock. Please check back soon.{% else %}Adding to your cart does not reserve stock. Guest checkout is available; check your order page for payment options after the total is confirmed.{% endif %}</p>
+      </form>
+      <dl class="product-facts"><div><dt>Availability</dt><dd>Listed in our catalog</dd></div><div><dt>Category</dt><dd>{{ product.category.name }}</dd></div></dl>
+      <div class="detail-support">{% include 'includes/icon.html' with name='heart' %}<span>Picked for your everyday campus life.</span></div>
+    </div>
+  </article>
+  <section class="product-description" aria-labelledby="about-product"><p class="eyebrow">THE DETAILS</p><h2 id="about-product">A closer look</h2>{% if product.description %}{{ product.description|linebreaks }}{% elif product.short_description %}<p>{{ product.short_description }}</p>{% else %}<p>More details about this product will be added soon.</p>{% endif %}</section>
+  <a class="text-link detail-back" href="{% url 'store:category' product.category.slug %}">Explore more in {{ product.category.name }} {% include 'includes/icon.html' with name='arrow' %}</a>
+  {% if related_products %}
+    <section class="related-products section" aria-labelledby="related-title">
+      <div class="section-heading"><div><p class="eyebrow">KEEP EXPLORING</p><h2 id="related-title">More in {{ product.category.name }}</h2></div></div>
+      <div class="product-grid">{% for product in related_products %}{% include 'store/includes/product_card.html' %}{% endfor %}</div>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

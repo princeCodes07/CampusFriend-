@@ -1,0 +1,42 @@
+{% load static %}
+<article class="product-card">
+  <a class="product-card-link" href="{% url 'store:product_detail' product.slug %}">
+    <div class="product-media">
+      {% if product.is_demo %}<span class="product-badge">Sample listing</span>{% elif product.is_featured and product.is_in_stock %}<span class="product-badge">Campus pick</span>{% endif %}
+      {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" width="480" height="480" loading="lazy" decoding="async" data-product-image data-fallback="{% static 'images/product-placeholder.svg' %}">
+      {% else %}
+        <img class="placeholder-image" src="{% static 'images/product-placeholder.svg' %}" alt="Image coming soon for {{ product.name }}" width="480" height="480" loading="lazy">
+      {% endif %}
+      <span class="product-open" aria-hidden="true">{% include 'includes/icon.html' with name='arrow' %}</span>
+    </div>
+  </a>
+  <div class="product-card-body">
+    <div class="product-card-heading">
+      <h3><a href="{% url 'store:product_detail' product.slug %}" title="{{ product.name }}">{{ product.name }}</a></h3>
+      <p class="stock-status {% if product.stock == None %}stock-unconfirmed{% elif not product.is_in_stock %}out-of-stock{% endif %}">{% if product.stock == None %}Availability to be confirmed{% elif product.is_in_stock %}In stock{% else %}Out of stock{% endif %}</p>
+    </div>
+    <div class="product-card-price-row">
+      <div class="price-row">
+        <span class="price">GH₵ {{ product.price|floatformat:2 }}</span>
+        {% if product.old_price != None and product.old_price > product.price %}<del><span class="visually-hidden">Previous price </span>GH₵ {{ product.old_price|floatformat:2 }}</del>{% endif %}
+      </div>
+      {% if product.is_in_stock %}
+        <form class="product-card-cart product-card-add" method="post" action="{% url 'orders:cart_add' product.pk %}">
+          {% csrf_token %}
+          <input type="hidden" name="quantity" value="1">
+          <button class="button button-primary" type="submit" aria-label="Add {{ product.name }} to cart" title="Add to cart">{% include 'includes/icon.html' with name='cart-plus' %}</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+  <div class="product-card-actions">
+    {% if product.is_in_stock %}
+      <form class="product-card-cart" method="post" action="{% url 'orders:cart_add' product.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="quantity" value="1">
+        <button class="button button-primary" type="submit" name="action" value="buy_now" aria-label="Buy {{ product.name }} now">Buy now</button>
+      </form>
+    {% endif %}
+  </div>
+</article>

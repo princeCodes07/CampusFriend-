@@ -1,0 +1,50 @@
+<div class="announcement">
+  <div class="container announcement-inner">
+    <span>{% include 'includes/icon.html' with name='pin' %} Made for life at KNUST</span>
+    <div class="announcement-actions">
+      {% if user.is_authenticated %}
+        <span class="account-greeting" title="{{ user.get_username }}">Hi, {{ user.get_username }}</span>
+        <form class="account-signout" method="post" action="{% url 'accounts:logout' %}">
+          {% csrf_token %}
+          <button class="account-link" type="submit">Sign out</button>
+        </form>
+      {% else %}
+        <a class="account-link" href="{% url 'accounts:login' %}{% if request.resolver_match.namespace != 'accounts' %}?next={{ request.get_full_path|urlencode }}{% endif %}">Sign in</a>
+        <a class="account-link account-link-primary" href="{% url 'accounts:signup' %}{% if request.resolver_match.namespace != 'accounts' %}?next={{ request.get_full_path|urlencode }}{% endif %}">Sign up</a>
+      {% endif %}
+      <a class="cart-link" href="{% url 'orders:cart_detail' %}" aria-label="Cart, {{ cart_count }} item{{ cart_count|pluralize }}">
+        {% include 'includes/icon.html' with name='bag' %}<span class="cart-count" aria-hidden="true">{{ cart_count }}</span>
+      </a>
+    </div>
+  </div>
+</div>
+<header class="site-header">
+  <div class="container navbar">
+    <a class="brand" href="{% url 'core:home' %}" aria-label="CampusFriend home">
+      <span class="brand-mark" aria-hidden="true">cf<span>.</span></span>
+      <span>Campus<span class="brand-light">Friend</span></span>
+    </a>
+    <form class="header-search" role="search" method="get" action="{% url 'store:product_list' %}">
+      <div class="header-search-field">
+        <label class="visually-hidden" for="shop-search">Search all products</label>
+        {% include 'includes/icon.html' with name='search' %}
+        <input id="shop-search" type="search" name="q" value="{{ query|default:'' }}" maxlength="200" placeholder="Search for anything" autocomplete="off">
+      </div>
+      <button class="button button-primary header-search-submit" type="submit">Search</button>
+    </form>
+    <div class="nav-actions">
+      <button class="icon-button menu-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open menu" hidden>
+        {% include 'includes/icon.html' with name='menu' %}
+      </button>
+    </div>
+  </div>
+</header>
+<div class="site-navigation">
+  <nav class="container primary-navigation" id="primary-navigation" aria-label="Main navigation">
+    <a href="{% url 'core:home' %}" {% if nav_section == 'home' %}aria-current="page"{% endif %}>Home</a>
+    <a href="{% url 'store:product_list' %}" {% if nav_section == 'shop' %}aria-current="page"{% endif %}>Store</a>
+    <a href="{% url 'repairs:home' %}" {% if request.resolver_match.namespace == 'repairs' %}aria-current="page"{% endif %}>Repairs</a>
+    <a href="{% url 'store:books' %}" {% if nav_section == 'books' %}aria-current="page"{% endif %}>Books</a>
+    <a href="{% url 'orders:order_list' %}" {% if nav_section == 'orders' %}aria-current="page"{% endif %}>Track Order</a>
+  </nav>
+</div>
