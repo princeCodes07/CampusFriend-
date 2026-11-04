@@ -431,8 +431,12 @@ WhiteNoise middleware and compressed manifest static storage are configured.
 `manage.py collectstatic --noinput` builds assets into ignored `staticfiles/`.
 The development server serves source assets while DEBUG=True.
 
-Render deployment, PostgreSQL configuration, and Cloudinary storage are not yet
-configured. `DATABASE_URL` and `CLOUDINARY_URL` are currently unused. Paystack
+PostgreSQL configuration and guarded data-transfer commands are ready; follow
+[the PostgreSQL operator runbook](POSTGRESQL.md) before connecting a database.
+Blank `DATABASE_URL` keeps local SQLite; Render requires a PostgreSQL URL supplied
+privately in platform environment settings. The driver uses TLS by default.
+Render deployment and Cloudinary storage are not yet configured.
+`CLOUDINARY_URL` is currently unused. Paystack
 initialization, verification, and signed webhooks are implemented; its public key,
 secret key, and live-mode flag are read from the environment. Keep test mode
 until live payments are explicitly authorized.

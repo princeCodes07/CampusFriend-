@@ -64,7 +64,7 @@ def current_repair_price(repair_request):
 
 def create_payment_attempt(repair_request_id, email):
     with transaction.atomic():
-        repair_request = RepairRequest.objects.select_for_update().select_related(
+        repair_request = RepairRequest.objects.select_for_update(of=("self",)).select_related(
             "service", "phone_model"
         ).get(pk=repair_request_id)
         if repair_request.status == RepairRequest.Status.PAID or repair_request.payments.filter(
@@ -112,12 +112,12 @@ def mark_initialization_failed(payment_id):
 
 def record_verified_transaction(payment_id, data):
     with transaction.atomic():
-        payment = RepairPayment.objects.select_for_update().select_related(
-            "repair_request"
-        ).get(pk=payment_id)
+        # Match initialization's lock order: repair first, then payment.
+        repair_request_id = RepairPayment.objects.values_list("repair_request_id", flat=True).get(pk=payment_id)
         repair_request = RepairRequest.objects.select_for_update().get(
-            pk=payment.repair_request_id
+            pk=repair_request_id
         )
+        payment = RepairPayment.objects.select_for_update().get(pk=payment_id)
         try:
             valid_amount = (
                 type(data.get("amount")) is int

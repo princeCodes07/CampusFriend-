@@ -6,6 +6,8 @@ from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
+from .database import database_config
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
@@ -115,13 +117,8 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
-# Local development only. PostgreSQL configuration is a later milestone.
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+# Exported variables take precedence over .env; blank URL keeps local SQLite.
+DATABASES = {"default": database_config(BASE_DIR, os.environ)}
 
 AUTH_PASSWORD_VALIDATORS = [
     {

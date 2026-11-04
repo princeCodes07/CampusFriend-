@@ -30,6 +30,7 @@ htmlcov/
 # Local backups and database variants (keep data outside source control).
 /backups/
 /local-backups/
+/private-transfer/
 *.sqlite
 *.sqlite-*
 *.db

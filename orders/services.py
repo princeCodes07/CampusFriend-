@@ -48,7 +48,9 @@ def create_pending_order(*, guest_id, checkout_token, quantities, expected_finge
 
     try:
         with transaction.atomic():
-            products = list(visible_products().filter(pk__in=cleaned).select_for_update().order_by("pk"))
+            # The optional category parent is a LEFT JOIN; PostgreSQL cannot
+            # lock its nullable side. Lock the purchased product rows explicitly.
+            products = list(visible_products().filter(pk__in=cleaned).select_for_update(of=("self",)).order_by("pk"))
             if len(products) != len(cleaned):
                 raise CheckoutError("Some products are no longer available. Please review your cart.")
             items = []
