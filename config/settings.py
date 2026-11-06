@@ -20,6 +20,30 @@ if not SECRET_KEY.strip():
 
 DEBUG = os.environ.get("DEBUG", "False").strip().lower() == "true"
 
+# Render captures stderr. Keep errors visible with DEBUG=False, while omitting
+# exception messages, SQL, URLs, request data and local variable values.
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "safe_exception": {
+            "()": "config.safe_logging.SafeExceptionFormatter",
+        },
+    },
+    "handlers": {
+        "safe_console": {
+            "class": "logging.StreamHandler",
+            "formatter": "safe_exception",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["safe_console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+    },
+}
 
 def environment_flag(name, default):
     value = os.environ.get(name)
