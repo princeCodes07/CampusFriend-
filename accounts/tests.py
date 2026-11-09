@@ -15,11 +15,11 @@ from store.models import Category, Product
     'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
 })
 class AccountTests(TestCase):
-    password = 'Campus-test-only!River92'
+     = 'Campus-test-only!River92'
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = get_user_model().objects.create_user(username='student', password=cls.password)
+        cls.user = get_user_model().objects.create_user(username='student', =cls.)
         category = Category.objects.create(name='Accessories')
         cls.product = Product.objects.create(category=category, name='Cable', sku='ACCOUNT-CABLE', price='10.05', stock=5)
 
@@ -29,7 +29,7 @@ class AccountTests(TestCase):
         self.logout_url = reverse('accounts:logout')
 
     def signup_data(self, **changes):
-        return {'username': 'newstudent', 'password1': self.password, 'password2': self.password, **changes}
+        return {'username': 'newstudent', '1': self., '2': self., **changes}
 
     def fill_cart(self, client=None):
         browser = client or self.client
@@ -60,13 +60,13 @@ class AccountTests(TestCase):
                 self.assertIn('no-store', response.headers['Cache-Control'])
         self.assertEqual(get_user_model().objects.count(), 1)
 
-    def test_signup_hashes_password_logs_in_and_preserves_cart_and_guest_context(self):
+    def test_signup_hashes__logs_in_and_preserves_cart_and_guest_context(self):
         old_key, guest_id = self.fill_cart()
         response = self.client.post(self.signup_url, self.signup_data(next=reverse('orders:checkout')), follow=True)
         self.assertRedirects(response, reverse('orders:checkout'))
         user = get_user_model().objects.get(username='newstudent')
-        self.assertTrue(user.check_password(self.password))
-        self.assertNotEqual(user.password, self.password)
+        self.assertTrue(user.check_(self.))
+        self.assertNotEqual(user., self.)
         self.assertEqual(self.client.session[SESSION_KEY], str(user.pk))
         self.assertNotEqual(self.client.session.session_key, old_key)
         self.assertEqual(self.client.session[GUEST_SESSION_KEY], guest_id)
@@ -78,8 +78,8 @@ class AccountTests(TestCase):
 
     def test_signup_rejects_weak_mismatched_and_duplicate_credentials(self):
         for changes in (
-            {'password1': '123', 'password2': '123'},
-            {'password2': 'different'},
+            {'1': '123', '2': '123'},
+            {'2': 'different'},
             {'username': 'student'},
             {'username': 'STUDENT'},
             {'username': '<script>bad</script>'},
@@ -91,9 +91,9 @@ class AccountTests(TestCase):
                 self.assertTrue(response.context['form'].errors)
                 self.assertNotIn(SESSION_KEY, self.client.session)
                 self.assertEqual(get_user_model().objects.count(), 1)
-                self.assertNotContains(response, self.password)
+                self.assertNotContains(response, self.)
 
-    def test_signup_cannot_set_privileges_or_override_password_validators(self):
+    def test_signup_cannot_set_privileges_or_override__validators(self):
         self.client.post(self.signup_url, self.signup_data(is_staff='true', is_superuser='true', is_active='false'))
         user = get_user_model().objects.get(username='newstudent')
         self.assertFalse(user.is_staff)
@@ -102,7 +102,7 @@ class AccountTests(TestCase):
 
     def test_signin_preserves_cart_and_rotates_session(self):
         old_key, guest_id = self.fill_cart()
-        response = self.client.post(self.login_url, {'username': 'student', 'password': self.password, 'next': reverse('orders:checkout')})
+        response = self.client.post(self.login_url, {'username': 'student', '': self., 'next': reverse('orders:checkout')})
         self.assertRedirects(response, reverse('orders:checkout'))
         self.assertEqual(self.client.session[SESSION_KEY], str(self.user.pk))
         self.assertNotEqual(self.client.session.session_key, old_key)
@@ -111,22 +111,22 @@ class AccountTests(TestCase):
         self.assertEqual(self.client.session['repair_guest_session_id'], 'existing-guest-repair')
 
     def test_incorrect_credentials_and_inactive_accounts_are_rejected(self):
-        for username, password in (('student', 'wrong'), ('missing', self.password)):
+        for username,  in (('student', 'wrong'), ('missing', self.)):
             with self.subTest(username=username):
-                response = self.client.post(self.login_url, {'username': username, 'password': password})
+                response = self.client.post(self.login_url, {'username': username, '': })
                 self.assertEqual(response.status_code, 200)
                 self.assertTrue(response.context['form'].non_field_errors())
                 self.assertNotIn(SESSION_KEY, self.client.session)
         self.user.is_active = False
         self.user.save(update_fields=['is_active'])
-        response = self.client.post(self.login_url, {'username': 'student', 'password': self.password})
+        response = self.client.post(self.login_url, {'username': 'student', '': self.})
         self.assertTrue(response.context['form'].errors)
         self.assertNotIn(SESSION_KEY, self.client.session)
 
     def test_authentication_posts_require_csrf(self):
         browser = Client(enforce_csrf_checks=True)
         for url, data in ((self.signup_url, self.signup_data()),
-                          (self.login_url, {'username': 'student', 'password': self.password}),
+                          (self.login_url, {'username': 'student', '': self.}),
                           (self.logout_url, {})):
             with self.subTest(url=url):
                 self.assertEqual(browser.post(url, data).status_code, 403)
@@ -138,7 +138,7 @@ class AccountTests(TestCase):
         self.assertRedirects(response, reverse('core:home'))
         browser.get(self.login_url)
         response = browser.post(self.login_url, {
-            'username': 'newstudent', 'password': self.password,
+            'username': 'newstudent', '': self.,
             'csrfmiddlewaretoken': browser.cookies['csrftoken'].value,
         })
         self.assertRedirects(response, reverse('core:home'))
@@ -150,7 +150,7 @@ class AccountTests(TestCase):
             for route in ('login', 'signup'):
                 with self.subTest(route=route, destination=destination):
                     browser = Client()
-                    data = ({'username': 'student', 'password': self.password} if route == 'login'
+                    data = ({'username': 'student', '': self.} if route == 'login'
                             else self.signup_data(username=f'new-{index}'))
                     response = browser.post(reverse('accounts:' + route), {**data, 'next': destination})
                     self.assertRedirects(response, reverse('core:home'))
@@ -159,7 +159,7 @@ class AccountTests(TestCase):
         for route in ('login', 'signup'):
             with self.subTest(route=route):
                 browser = Client()
-                data = ({'username': 'student', 'password': self.password} if route == 'login' else self.signup_data())
+                data = ({'username': 'student', '': self.} if route == 'login' else self.signup_data())
                 response = browser.post(reverse('accounts:' + route), {**data, 'next': 'http://testserver/shop/'}, secure=True)
                 self.assertRedirects(response, reverse('core:home'))
 
@@ -170,14 +170,14 @@ class AccountTests(TestCase):
             self.assertEqual(response.context['next'], destination)
             self.assertContains(response, 'name="next" value="/shop/?q=usb&amp;sort=price_low"')
         response = self.client.post(self.login_url + '?next=/cart/', {
-            'username': 'student', 'password': self.password, 'next': '/shop/',
+            'username': 'student', '': self., 'next': '/shop/',
         })
         self.assertRedirects(response, '/shop/')
 
     def test_authenticated_visitors_do_not_create_another_account_or_switch_users(self):
         self.client.force_login(self.user)
         for url, data in ((self.signup_url, self.signup_data()),
-                          (self.login_url, {'username': 'different', 'password': self.password})):
+                          (self.login_url, {'username': 'different', '': self.})):
             self.assertRedirects(self.client.get(url), reverse('core:home'))
             self.assertRedirects(self.client.post(url, data), reverse('core:home'))
         self.assertEqual(get_user_model().objects.count(), 1)

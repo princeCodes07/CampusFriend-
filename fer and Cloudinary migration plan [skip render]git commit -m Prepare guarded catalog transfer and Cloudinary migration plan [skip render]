@@ -1,0 +1,6 @@
+ CATALOG_TRANSFER.md           | 216 [32m++++++++++++++++++++++++++++++++++++++++[m
+ CLOUDINARY_MIGRATION.md       | 102 [32m+++++++++++++++++++[m
+ catalog_transfer.py           |  89 [32m+++++++++++++++++[m
+ core/catalog_transfer.py      | 224 [32m++++++++++++++++++++++++++++++++++++++++++[m
+ core/test_catalog_transfer.py | 153 [32m+++++++++++++++++++++++++++++[m
+ 5 files changed, 784 insertions(+)

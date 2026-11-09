@@ -1165,7 +1165,7 @@ Never commit:
 - Django secret
 - Paystack secret
 - PostgreSQL credentials
-- admin passwords
+- admin s
 - local databases
 
 db.sqlite3 must remain ignored.

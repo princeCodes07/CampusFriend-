@@ -263,5 +263,5 @@ and payment status.
 | Admin username | [ADMIN_USERNAME] |
 | Admin email | [ADMIN_EMAIL] |
 
-Admin passwords must be entered manually in the local terminal, never recorded
+Admin s must be entered manually in the local terminal, never recorded
 in documentation, source code, .env.example, or Git history.
